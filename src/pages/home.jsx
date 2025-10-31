@@ -1,14 +1,14 @@
 import { Fragment } from "react"
 import Navbar from "../components/navbar"
 
-const Stats = () => {
+const Home = () => {
 
     return (
         <Fragment>
             <Navbar/>
-            <h1>Stats</h1>
+            <h1>Home</h1>
         </Fragment>
     )
 }
 
-export default Stats
+export default Home
