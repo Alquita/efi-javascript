@@ -1,8 +1,8 @@
 # EFI - Práctica Profesionalizante I (JavaScript)
 
 ## Integrantes
-- [Nombre Completo 1] - [Alquita](https://github.com/Alquita)
-- [Nombre Completo 2] - [Joaquin-CasVar](https://github.com/Joaquin-CasVar)
+- [Valentino Alcaraz Sgarlatta] - [Alquita](https://github.com/Alquita)
+- [Joaquin Castellano Varela] - [Joaquin-CasVar](https://github.com/Joaquin-CasVar)
 
 ## Backend
 - API Flask: [URL_DEL_BACKEND]
