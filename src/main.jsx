@@ -6,12 +6,15 @@ import 'primereact/resources/themes/lara-dark-purple/theme.css'
 import 'primeicons/primeicons.css'
 import 'react-toastify/dist/ReactToastify.css'
 import App from './App.jsx'
+import { AuthProvider } from './pages/auth/AuthContext' 
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
-      <ToastContainer position='top-right' autoClose={3000} />
+      <AuthProvider>  
+        <App />
+        <ToastContainer position='top-right' autoClose={3000} />
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
