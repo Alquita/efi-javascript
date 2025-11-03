@@ -1,4 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Card } from 'primereact/card'
 import { Button } from "primereact/button"
 import { DataTable } from "primereact/datatable"
@@ -8,13 +9,15 @@ import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
 
 const actionsTemplate = (row, opts) => {
+    const navigate = useNavigate()
     const { user } = useContext(AuthContext)
+
     const id = opts.rowIndex
-    
+
     return (
         <div>
-            <Button icon='pi pi-pencil' />
-            { user?.role === 'admin' && <Button icon='pi pi-trash'  /> }
+            <Button icon='pi pi-pencil' onClick={() => navigate(`/categories/${id}`)} />
+            {user?.role === 'admin' && <Button icon='pi pi-trash' />}
         </div>
     )
 }
@@ -36,8 +39,7 @@ const Categories = () => {
             const data = await res.json()
             setCategories(data)
         } catch (error) {
-            setError('Error al cargar las categorias')
-            console.error(error);
+            console.error('Error al cargar las categorias', error);
         } finally {
             setLoading(false)
         }
@@ -50,14 +52,14 @@ const Categories = () => {
 
     return (
         <Fragment>
-            <Navbar/>
+            <Navbar />
             <Card title='Categorías'>
-                {error && <p style={{color: 'red'}}>{error}</p>}
-                {loading ? <ProgressSpinner/> :
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {loading ? <ProgressSpinner /> :
                     <DataTable value={categories} emptyMessage='No hay categorías cargadas'>
-                        <Column field="name" header='Nombre'/>
-                        { (user?.role === 'moderator' || user?.role === 'admin') &&
-                        <Column header='Acciones' body={actionsTemplate} style={{width: '15%'}} />
+                        <Column field="name" header='Nombre' />
+                        {(user?.role === 'moderator' || user?.role === 'admin') &&
+                            <Column header='Acciones' body={actionsTemplate} style={{ width: '15%' }} />
                         }
                     </DataTable>
                 }

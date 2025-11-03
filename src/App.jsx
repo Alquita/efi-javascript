@@ -21,6 +21,7 @@ function App() {
         <Route path='/posts/new' element={<PostForm/>} />
         <Route path='/categories' element={<Categories/>} />
         <Route path='/categories/new' element={<CategoryForm/>} />
+        <Route path='/categories/:id' element={<CategoryForm/>} />
         <Route path='/users' element={<Users/>} />
         <Route path='/stats' element={<Stats/>} />
       </Routes>
