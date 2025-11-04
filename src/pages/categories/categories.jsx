@@ -5,29 +5,50 @@ import { Button } from "primereact/button"
 import { DataTable } from "primereact/datatable"
 import { Column } from 'primereact/column'
 import { ProgressSpinner } from 'primereact/progressspinner'
+import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
 
-const actionsTemplate = (row, opts) => {
-    const navigate = useNavigate()
-    const { user } = useContext(AuthContext)
-
-    const id = opts.rowIndex
-
-    return (
-        <div>
-            <Button icon='pi pi-pencil' onClick={() => navigate(`/categories/${id}`)} />
-            {user?.role === 'admin' && <Button icon='pi pi-trash' />}
-        </div>
-    )
-}
 
 const Categories = () => {
-    const { user } = useContext(AuthContext)
-
+    const { user, token } = useContext(AuthContext)
+    
     const [categories, setCategories] = useState([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    
+    const actionsTemplate = (row, opts) => {
+        const navigate = useNavigate()
+    
+        const id = opts.rowIndex
+    
+        return (
+            <div>
+                <Button icon='pi pi-pencil' onClick={() => navigate(`/categories/${id}`)} />
+                {user?.role === 'admin' &&
+                    <Button icon='pi pi-trash' onClick={() => deleteCategory(row.id, token)} />
+                }
+            </div>
+        )
+    }
+
+    const deleteCategory = async (id) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/categories/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            })
+            if (!res.ok) throw new Error(`Hubo un error al eliminar la categoria ${res.status}`)
+    
+            fetchCategories()
+            toast.success('Categoria eliminada con exito')
+        } catch (error) {
+            toast.error('Hubo un error al eliminar la categoria')
+            console.error('Hubo un error al eliminar la categoria', error);
+        }
+    }
 
     const fetchCategories = async () => {
         setLoading(true)
