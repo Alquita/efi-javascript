@@ -3,12 +3,13 @@ import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "primereact/button"
 import { Panel } from 'primereact/panel'
 import { ProgressSpinner } from 'primereact/progressspinner'
+import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
 
 const PostDetail = () => {
     const navigate = useNavigate()
-    const { user } = useContext(AuthContext)
+    const { user, token } = useContext(AuthContext)
 
     const { id } = useParams()
     const postIndex = Number.isInteger(parseInt(id)) ? parseInt(id) : null
@@ -39,6 +40,24 @@ const PostDetail = () => {
         return (`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} a las ${date.toLocaleTimeString()}`)
     }
 
+    const deletePost = async (id) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            })
+            if (!res.ok) throw new Error(`Hubo un error al eliminar la publicacion ${res.status}`)
+    
+            setTimeout(() => navigate('/posts'), 2000)
+            toast.success('Publicacion eliminada con exito')
+        } catch (error) {
+            toast.error('Hubo un error al eliminar la publicacion')
+            console.error('Hubo un error al eliminar la publicacion', error);
+        }
+    }
+    
     useEffect(() => {
         fetchPost(postIndex)
     }, [])
@@ -51,11 +70,12 @@ const PostDetail = () => {
                 <div>
                     <span className="font-bold">{post.title} por {post.author ? post.author.username : 'Anonimo'}</span>
                 </div>
-                <div className="flex gap-3">
                     {(user?.role === 'admin' || user?.sub == post.author_id) &&
+                    <div className="flex gap-3">
                         <Button icon='pi pi-pencil' onClick={() => navigate(`/posts/${post.id}`)} />
+                        <Button icon='pi pi-trash' onClick={() => deletePost(post.id, token)} />
+                    </div>
                     }
-                </div>
             </div>
         )
     }
