@@ -5,12 +5,13 @@ import { Button } from "primereact/button"
 import { DataView } from "primereact/dataview"
 import { classNames } from "primereact/utils"
 import { ProgressSpinner } from 'primereact/progressspinner'
+import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
 
 const Posts = () => {
     const navigate = useNavigate()
-    const { user } = useContext(AuthContext)
+    const { user, token } = useContext(AuthContext)
 
     const [posts, setPosts] = useState([])
     const [loading, setLoading] = useState(false)
@@ -33,6 +34,24 @@ const Posts = () => {
 
     }
 
+    const deletePost = async (id) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            })
+            if (!res.ok) throw new Error(`Hubo un error al eliminar la publicacion ${res.status}`)
+    
+            fetchPosts()
+            toast.success('Publicacion eliminada con exito')
+        } catch (error) {
+            toast.error('Hubo un error al eliminar la publicacion')
+            console.error('Hubo un error al eliminar la publicacion', error);
+        }
+    }
+
     const postTemplate = (post, index) => {
         return (
             <div className="col-12" key={post.id}>
@@ -50,11 +69,12 @@ const Posts = () => {
                         </div>
                         <div className="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
                             <Button icon="pi pi-info" onClick={() => navigate(`/posts/detail/${post.id}`)} />
-                            <div className="gap-3">
                                 {(user?.role === 'admin' || user?.sub == post.author_id) &&
-                                    <Button icon='pi pi-pencil' onClick={() => navigate(`/posts/${post.id}`)} />
+                                    <div className="flex gap-3">
+                                        <Button icon='pi pi-pencil' onClick={() => navigate(`/posts/${post.id}`)} />
+                                        <Button icon='pi pi-trash' onClick={() => deletePost(post.id, token)} />
+                                    </div>
                                 }
-                            </div>
                         </div>
                     </div>
                 </div>
