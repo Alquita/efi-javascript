@@ -1,12 +1,88 @@
-import { Fragment } from "react"
+import { Fragment, useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { Card } from 'primereact/card'
+import { Button } from "primereact/button"
+import { DataView } from "primereact/dataview"
+import { classNames } from "primereact/utils"
+import { ProgressSpinner } from 'primereact/progressspinner'
 import Navbar from "../../components/navbar"
 
+
 const Posts = () => {
+    const navigate = useNavigate()
+
+    const [posts, setPosts] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState(null)
+
+    const fetchPosts = async () => {
+        setLoading(true)
+
+        try {
+            const res = await fetch('http://127.0.0.1:5000/api/posts')
+            if (!res.ok) throw new Error('Hubo un error al cargar las publicaciones')
+
+            const data = await res.json()
+            setPosts(data)
+        } catch (error) {
+            console.error('Error al cargar las publicaciones', error);
+        } finally {
+            setLoading(false)
+        }
+
+    }
+
+    const postTemplate = (post, index) => {
+        return (
+            <div className="col-12" key={post.id}>
+                <div className={classNames('flex flex-column xl:flex-row xl:align-items-start p-4 gap-4', { 'border-top-1 surface-border': index !== 0 })}>
+                    <div className="flex flex-column sm:flex-row justify-content-between align-items-center xl:align-items-start flex-1 gap-4">
+                        <div className="flex flex-column align-items-center sm:align-items-start gap-3">
+                            <div className="text-2xl font-bold text-900">{post.title}</div>
+                            <div>{post.content}</div>
+                            <div className="flex align-items-center gap-3">
+                                <span className="flex align-items-center gap-2">
+                                    <i className="pi pi-tag"></i>
+                                    <span className="font-semibold">{post.category ? post.category.name : 'Categoria eliminada'}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex sm:flex-column align-items-center sm:align-items-end gap-3 sm:gap-2">
+                            <Button icon="pi pi-info" onClick={() => navigate(`/posts/detail/${post.id}`)} />
+                            <div className="gap-3">
+                                <Button icon="pi pi-pencil" className="ml-2" />
+                                <Button icon="pi pi-trash" className="ml-3" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    const listTemplate = (items) => {
+        if (!items || items.length === 0) return null;
+
+        let list = items.map((product, index) => {
+            return postTemplate(product, index);
+        });
+
+        return <div className="grid grid-nogutter">{list}</div>;
+    };
+
+    useEffect(() => {
+        fetchPosts()
+    }, [])
 
     return (
         <Fragment>
-            <Navbar/>
-            <h1>Posts</h1>
+            <Navbar />
+            <Card title='Publicaciones'>
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {loading ? <ProgressSpinner /> :
+                    <DataView value={posts} listTemplate={listTemplate} paginator rows={10} />
+                }
+            </Card>
         </Fragment>
     )
 }

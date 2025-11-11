@@ -4,6 +4,7 @@ import Home from './pages/home'
 import Login from './pages/auth/login'
 import Register from './pages/auth/register'
 import Posts from './pages/posts/posts'
+import PostDetail from './pages/posts/post_detail'
 import PostForm from './pages/posts/post_form'
 import Categories from './pages/categories/categories'
 import CategoryForm from './pages/categories/category_form'
@@ -18,6 +19,7 @@ function App() {
         <Route path='/login' element={<Login/>} />
         <Route path='/register' element={<Register/>} />
         <Route path='/posts' element={<Posts/>} />
+        <Route path='/posts/detail/:id' element={<PostDetail/>} />
         <Route path='/posts/new' element={<PostForm/>} />
         <Route path='/categories' element={<Categories/>} />
         <Route path='/categories/new' element={<CategoryForm/>} />

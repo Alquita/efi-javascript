@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify'
 import 'primereact/resources/themes/lara-dark-purple/theme.css'
 import 'primeicons/primeicons.css'
 import 'react-toastify/dist/ReactToastify.css'
+import '/node_modules/primeflex/primeflex.css'
 import App from './App.jsx'
 import { AuthProvider } from './pages/auth/AuthContext' 
 
