@@ -1,12 +1,14 @@
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, useContext, useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { Card } from "primereact/card"
+import { Button } from "primereact/button"
 import { Panel } from 'primereact/panel'
 import { ProgressSpinner } from 'primereact/progressspinner'
 import Navbar from "../../components/navbar"
+import { AuthContext } from "../auth/AuthContext"
 
 const PostDetail = () => {
     const navigate = useNavigate()
+    const { user } = useContext(AuthContext)
 
     const { id } = useParams()
     const postIndex = Number.isInteger(parseInt(id)) ? parseInt(id) : null
@@ -34,7 +36,7 @@ const PostDetail = () => {
     const fechaTemplate = () => {
         const date = new Date(post.updated_at)
 
-        return (`${date.getDay()}/${date.getMonth()}/${date.getFullYear()} a las ${date.toLocaleTimeString()}`)
+        return (`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} a las ${date.toLocaleTimeString()}`)
     }
 
     useEffect(() => {
@@ -50,7 +52,9 @@ const PostDetail = () => {
                     <span className="font-bold">{post.title} por {post.author ? post.author.username : 'Anonimo'}</span>
                 </div>
                 <div className="flex gap-3">
-
+                    {(user?.role === 'admin' || user?.sub == post.author_id) &&
+                        <Button icon='pi pi-pencil' onClick={() => navigate(`/posts/${post.id}`)} />
+                    }
                 </div>
             </div>
         )
@@ -75,12 +79,12 @@ const PostDetail = () => {
     return (
         <Fragment>
             <Navbar />
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {loading ? <ProgressSpinner /> :
-                    <Panel headerTemplate={headerTemplate} footerTemplate={footerTemplate} className="mt-3">
-                        <p className="m-0">{post.content}</p>
-                    </Panel>
-                }
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+            {loading ? <ProgressSpinner /> :
+                <Panel headerTemplate={headerTemplate} footerTemplate={footerTemplate} className="mt-3">
+                    <p className="m-0">{post.content}</p>
+                </Panel>
+            }
         </Fragment>
     )
 }
