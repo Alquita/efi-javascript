@@ -25,9 +25,35 @@ const PostForm = () => {
     const [post, setPost] = useState([])
     const editIndex = Number.isInteger(parseInt(id)) ? parseInt(id) : null
 
-    const categories = [
-        {label: 'A', value: '1'}
-    ]
+    const [categories, setCategories] = useState([])
+    const [loading, setLoading] = useState(false)
+
+    const fetchCategories = async () => {
+        setLoading(true)
+
+        try {
+            const res = await fetch('http://127.0.0.1:5000/api/categories')
+            if (!res.ok) throw new Error('Hubo un error al cargar las categorias')
+
+            const data = await res.json()
+            const category = data.map((cat) => {
+                return {
+                    label: cat.name,
+                    value: cat.id
+                }
+            })            
+            setCategories(category)
+        } catch (error) {
+            console.error('Error al cargar las categorias', error);
+        } finally {
+            setLoading(false)
+        }
+
+    }
+
+    useEffect(()=>{
+        fetchCategories()
+    },[])
 
     useEffect(() => {
         if (editIndex !== null) {
