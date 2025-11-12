@@ -2,13 +2,14 @@ import { useContext, useEffect, useState } from "react"
 import { Button } from "primereact/button"
 import { DataScroller } from 'primereact/datascroller'
 import { useParams } from "react-router-dom"
+import { toast } from "react-toastify"
 import { AuthContext } from "../pages/auth/AuthContext"
 
 const Comments = () => {
     const { user, token } = useContext(AuthContext)
 
-    const { id } = useParams()
-    const postIndex = Number.isInteger(parseInt(id)) ? parseInt(id) : null
+    const { id: postId } = useParams()
+    const postIndex = Number.isInteger(parseInt(postId)) ? parseInt(postId) : null
 
     const [comments, setComments] = useState([])
 
@@ -30,6 +31,24 @@ const Comments = () => {
         return (`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} a las ${date.toLocaleTimeString()}`)
     }
 
+    const deleteComment = async (id) => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/comments/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+            })
+            if (!res.ok) throw new Error(`Hubo un error al eliminar el comentario ${res.status}`)
+    
+            fetchComments(postIndex)
+            toast.success('Comentario eliminado con exito')
+        } catch (error) {
+            toast.error('Hubo un error al eliminar el comentario')
+            console.error('Hubo un error al eliminar el comentario', error);
+        }
+    }
+
     useEffect(() => {
         fetchComments(postIndex)
     },[])
@@ -48,7 +67,7 @@ const Comments = () => {
                         <div className="flex flex-row lg:flex-column align-items-center lg:align-items-end gap-4 lg:gap-2">
                             {(user?.role === 'admin' || user?.role === 'moderator' || user?.sub == comment.author_id) &&
                             <div className="flex gap-3">
-                                <Button icon='pi pi-trash' onClick={() => deleteComment(comment.id, token)} disabled />
+                                <Button icon='pi pi-trash' onClick={() => deleteComment(comment.id, token)} />
                             </div>
                             }
                         </div>
