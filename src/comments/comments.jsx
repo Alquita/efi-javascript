@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Button } from "primereact/button"
 import { DataScroller } from 'primereact/datascroller'
 import { useParams } from "react-router-dom"
@@ -11,11 +11,8 @@ const Comments = () => {
     const postIndex = Number.isInteger(parseInt(id)) ? parseInt(id) : null
 
     const [comments, setComments] = useState([])
-    const [loading, setLoading] = useState(false)
 
     const fetchComments = async (id) => {
-        setLoading(true)
-
         try {
             const res = await fetch(`http://127.0.0.1:5000/api/posts/${id}/comments`)
             if (!res.ok) throw new Error('Hubo un error al cargar los comentarios')
@@ -24,8 +21,6 @@ const Comments = () => {
             setComments(data)
         } catch (error) {
             console.error('Error al cargar los comentarios', error);
-        } finally {
-            setLoading(false)
         }
     }
 

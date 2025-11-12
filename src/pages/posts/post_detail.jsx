@@ -7,6 +7,7 @@ import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
 import Comments from "../../comments/comments"
+import CommentForm from "../../comments/comment_form"
 
 const PostDetail = () => {
     const navigate = useNavigate()
@@ -105,6 +106,7 @@ const PostDetail = () => {
                 <Panel headerTemplate={headerTemplate} footerTemplate={footerTemplate} className="mt-3">
                     <p className="m-0">{post.content}</p>
                 </Panel>
+                <CommentForm/>
                 <Comments/>
             </div>
             }
