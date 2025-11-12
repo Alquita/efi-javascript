@@ -11,31 +11,52 @@ const Stats = () => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        fetchStats()
-    }, [])
+        if (token && user) {
+            fetchStats()
+        }
+    }, [token, user])
 
     const fetchStats = async () => {
         try {
             setLoading(true)
-            const response = await fetch('http://localhost:5000/api/stats', {
+            const response = await fetch('http://127.0.0.1:5000/api/stats', {
+                method: 'GET',
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             })
 
             if (!response.ok) {
-                toast.error('Error al cargar estadísticas')
+                const errorText = await response.text()
+                console.error('Error response:', response.status, errorText)
+                toast.error(`Error al cargar estadísticas: ${response.status}`)
                 return
             }
 
             const data = await response.json()
+            console.log('Stats data:', data)
             setStats(data)
         } catch (error) {
-            console.error('Error:', error)
+            console.error('Error completo:', error)
             toast.error('Error al conectar con el servidor')
         } finally {
             setLoading(false)
         }
+    }
+
+    if (!user) {
+        return (
+            <Fragment>
+                <Navbar />
+                <div className="container mx-auto px-4 py-8">
+                    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                        <p className="font-bold">Sesión no iniciada</p>
+                        <p>Debes iniciar sesión para ver las estadísticas.</p>
+                    </div>
+                </div>
+            </Fragment>
+        )
     }
 
     if (user?.role !== 'admin' && user?.role !== 'moderator') {
@@ -66,27 +87,50 @@ const Stats = () => {
         )
     }
 
+    if (!stats) {
+        return (
+            <Fragment>
+                <Navbar />
+                <div className="container mx-auto px-4 py-8">
+                    <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+                        <p className="font-bold">No hay datos disponibles</p>
+                        <p>No se pudieron cargar las estadísticas.</p>
+                        <button 
+                            onClick={fetchStats}
+                            className="mt-3 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                        >
+                            Reintentar
+                        </button>
+                    </div>
+                </div>
+            </Fragment>
+        )
+    }
+
+    const hasValidPostsLastWeek = typeof stats.posts_last_week === 'number'
+    const isAdmin = user?.role === 'admin'
+
     const pieData = [
-        { name: 'Posts', value: stats?.total_posts || 0, color: '#8b5cf6' },
-        { name: 'Comentarios', value: stats?.total_comments || 0, color: '#ec4899' },
-        { name: 'Usuarios', value: stats?.total_users || 0, color: '#06b6d4' }
+        { name: 'Posts', value: stats.total_posts || 0, color: '#8b5cf6' },
+        { name: 'Comentarios', value: stats.total_comments || 0, color: '#ec4899' },
+        { name: 'Usuarios', value: stats.total_users || 0, color: '#06b6d4' }
     ]
 
     const barData = [
-        { name: 'Posts', cantidad: stats?.total_posts || 0 },
-        { name: 'Comentarios', cantidad: stats?.total_comments || 0 },
-        { name: 'Usuarios', cantidad: stats?.total_users || 0 }
+        { name: 'Posts', cantidad: stats.total_posts || 0 },
+        { name: 'Comentarios', cantidad: stats.total_comments || 0 },
+        { name: 'Usuarios', cantidad: stats.total_users || 0 }
     ]
 
-    const activityData = [
-        { dia: 'Lun', posts: Math.floor((stats?.posts_last_week || 0) * 0.15) },
-        { dia: 'Mar', posts: Math.floor((stats?.posts_last_week || 0) * 0.12) },
-        { dia: 'Mié', posts: Math.floor((stats?.posts_last_week || 0) * 0.18) },
-        { dia: 'Jue', posts: Math.floor((stats?.posts_last_week || 0) * 0.14) },
-        { dia: 'Vie', posts: Math.floor((stats?.posts_last_week || 0) * 0.16) },
-        { dia: 'Sáb', posts: Math.floor((stats?.posts_last_week || 0) * 0.13) },
-        { dia: 'Dom', posts: Math.floor((stats?.posts_last_week || 0) * 0.12) }
-    ]
+    const activityData = hasValidPostsLastWeek ? [
+        { dia: 'Lun', posts: Math.floor((stats.posts_last_week || 0) * 0.15) },
+        { dia: 'Mar', posts: Math.floor((stats.posts_last_week || 0) * 0.12) },
+        { dia: 'Mié', posts: Math.floor((stats.posts_last_week || 0) * 0.18) },
+        { dia: 'Jue', posts: Math.floor((stats.posts_last_week || 0) * 0.14) },
+        { dia: 'Vie', posts: Math.floor((stats.posts_last_week || 0) * 0.16) },
+        { dia: 'Sáb', posts: Math.floor((stats.posts_last_week || 0) * 0.13) },
+        { dia: 'Dom', posts: Math.floor((stats.posts_last_week || 0) * 0.12) }
+    ] : []
 
     const COLORS = ['#8b5cf6', '#ec4899', '#06b6d4']
 
@@ -101,59 +145,63 @@ const Stats = () => {
                     <p className="text-gray-400">Panel de métricas y análisis de la plataforma</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <Card className="bg-gradient-to-br from-purple-600 to-purple-800 border-0">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-purple-200 text-sm mb-1">Total Posts</p>
-                                <p className="text-4xl font-bold text-white">{stats?.total_posts || 0}</p>
-                            </div>
-                            <div className="bg-white bg-opacity-20 p-4 rounded-full">
-                                <i className="pi pi-file text-3xl text-white"></i>
-                            </div>
-                        </div>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-pink-600 to-pink-800 border-0">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-pink-200 text-sm mb-1">Comentarios</p>
-                                <p className="text-4xl font-bold text-white">{stats?.total_comments || 0}</p>
-                            </div>
-                            <div className="bg-white bg-opacity-20 p-4 rounded-full">
-                                <i className="pi pi-comments text-3xl text-white"></i>
-                            </div>
-                        </div>
-                    </Card>
-
-                    <Card className="bg-gradient-to-br from-cyan-600 to-cyan-800 border-0">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-cyan-200 text-sm mb-1">Usuarios</p>
-                                <p className="text-4xl font-bold text-white">{stats?.total_users || 0}</p>
-                            </div>
-                            <div className="bg-white bg-opacity-20 p-4 rounded-full">
-                                <i className="pi pi-users text-3xl text-white"></i>
-                            </div>
-                        </div>
-                    </Card>
-
-                    {user?.role === 'admin' && stats?.posts_last_week !== undefined && (
-                        <Card className="bg-gradient-to-br from-orange-600 to-orange-800 border-0">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-orange-200 text-sm mb-1">Posts (7 días)</p>
-                                    <p className="text-4xl font-bold text-white">{stats?.posts_last_week || 0}</p>
+                {/* 🔧 MODIFICACIÓN: centramos todas las cards del bloque superior */}
+                <div className="flex justify-center">
+                    <div className={`grid justify-center items-center text-center grid-cols-1 md:grid-cols-2 ${isAdmin && hasValidPostsLastWeek ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6 mb-8 max-w-6xl w-full`}>
+                        <Card className="bg-gradient-to-br from-purple-600 to-purple-800 border-0">
+                            <div className="flex items-center justify-center gap-4">
+                                <div className="text-center">
+                                    <p className="text-purple-200 text-sm mb-1">Total Posts</p>
+                                    <p className="text-4xl font-bold text-white">{stats.total_posts || 0}</p>
                                 </div>
                                 <div className="bg-white bg-opacity-20 p-4 rounded-full">
-                                    <i className="pi pi-chart-line text-3xl text-white"></i>
+                                    <i className="pi pi-file text-3xl text-white"></i>
                                 </div>
                             </div>
                         </Card>
-                    )}
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <Card className="bg-gradient-to-br from-pink-600 to-pink-800 border-0">
+                            <div className="flex items-center justify-center gap-4">
+                                <div className="text-center">
+                                    <p className="text-pink-200 text-sm mb-1">Comentarios</p>
+                                    <p className="text-4xl font-bold text-white">{stats.total_comments || 0}</p>
+                                </div>
+                                <div className="bg-white bg-opacity-20 p-4 rounded-full">
+                                    <i className="pi pi-comments text-3xl text-white"></i>
+                                </div>
+                            </div>
+                        </Card>
+
+                        <Card className="bg-gradient-to-br from-cyan-600 to-cyan-800 border-0">
+                            <div className="flex items-center justify-center gap-4">
+                                <div className="text-center">
+                                    <p className="text-cyan-200 text-sm mb-1">Usuarios</p>
+                                    <p className="text-4xl font-bold text-white">{stats.total_users || 0}</p>
+                                </div>
+                                <div className="bg-white bg-opacity-20 p-4 rounded-full">
+                                    <i className="pi pi-users text-3xl text-white"></i>
+                                </div>
+                            </div>
+                        </Card>
+
+                        {isAdmin && hasValidPostsLastWeek && (
+                            <Card className="bg-gradient-to-br from-orange-600 to-orange-800 border-0">
+                                <div className="flex items-center justify-center gap-4">
+                                    <div className="text-center">
+                                        <p className="text-orange-200 text-sm mb-1">Posts (7 días)</p>
+                                        <p className="text-4xl font-bold text-white">{stats.posts_last_week || 0}</p>
+                                    </div>
+                                    <div className="bg-white bg-opacity-20 p-4 rounded-full">
+                                        <i className="pi pi-chart-line text-3xl text-white"></i>
+                                    </div>
+                                </div>
+                            </Card>
+                        )}
+                    </div>
+                </div>
+                {/* 🔧 FIN DE MODIFICACIÓN */}
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-8 max-w-6xl mx-auto">
                     <Card title="Comparativa General" className="shadow-lg">
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={barData}>
@@ -179,11 +227,12 @@ const Stats = () => {
                                     data={pieData}
                                     cx="50%"
                                     cy="50%"
-                                    labelLine={false}
-                                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                                    labelLine={true}
+                                    label={({ name, value, percent }) => `${name}: ${value} (${(percent * 100).toFixed(0)}%)`}
                                     outerRadius={100}
                                     fill="#8884d8"
                                     dataKey="value"
+                                    style={{ fontSize: '14px', fontWeight: 'bold' }}
                                 >
                                     {pieData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -196,46 +245,53 @@ const Stats = () => {
                                         borderRadius: '8px'
                                     }}
                                 />
+                                <Legend 
+                                    verticalAlign="bottom" 
+                                    height={36}
+                                    formatter={(value, entry) => `${value}: ${entry.payload.value}`}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                     </Card>
                 </div>
 
-                {user?.role === 'admin' && stats?.posts_last_week !== undefined && (
-                    <Card title="Actividad de la Última Semana" className="shadow-lg mb-8">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={activityData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                                <XAxis dataKey="dia" stroke="#9ca3af" />
-                                <YAxis stroke="#9ca3af" />
-                                <Tooltip 
-                                    contentStyle={{ 
-                                        backgroundColor: '#1f2937', 
-                                        border: '1px solid #374151',
-                                        borderRadius: '8px'
-                                    }}
-                                />
-                                <Legend />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="posts" 
-                                    stroke="#f97316" 
-                                    strokeWidth={3}
-                                    dot={{ fill: '#f97316', r: 6 }}
-                                    activeDot={{ r: 8 }}
-                                />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </Card>
+                {isAdmin && hasValidPostsLastWeek && (
+                    <div className="max-w-4xl mx-auto mb-8">
+                        <Card title="Actividad de la Última Semana" className="shadow-lg">
+                            <ResponsiveContainer width="100%" height={300}>
+                                <LineChart data={activityData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                                    <XAxis dataKey="dia" stroke="#9ca3af" />
+                                    <YAxis stroke="#9ca3af" />
+                                    <Tooltip 
+                                        contentStyle={{ 
+                                            backgroundColor: '#1f2937', 
+                                            border: '1px solid #374151',
+                                            borderRadius: '8px'
+                                        }}
+                                    />
+                                    <Legend />
+                                    <Line 
+                                        type="monotone" 
+                                        dataKey="posts" 
+                                        stroke="#f97316" 
+                                        strokeWidth={3}
+                                        dot={{ fill: '#f97316', r: 6 }}
+                                        activeDot={{ r: 8 }}
+                                    />
+                                </LineChart>
+                            </ResponsiveContainer>
+                        </Card>
+                    </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
                     <Card className="shadow-lg">
                         <div className="text-center">
                             <i className="pi pi-chart-bar text-5xl text-purple-500 mb-4"></i>
                             <h3 className="text-xl font-bold mb-2">Promedio de Comentarios</h3>
                             <p className="text-3xl font-bold text-purple-400">
-                                {stats?.total_posts > 0 
+                                {stats.total_posts > 0 
                                     ? (stats.total_comments / stats.total_posts).toFixed(1) 
                                     : '0'}
                             </p>
@@ -248,7 +304,7 @@ const Stats = () => {
                             <i className="pi pi-users text-5xl text-pink-500 mb-4"></i>
                             <h3 className="text-xl font-bold mb-2">Engagement Rate</h3>
                             <p className="text-3xl font-bold text-pink-400">
-                                {stats?.total_users > 0 
+                                {stats.total_users > 0 
                                     ? ((stats.total_posts + stats.total_comments) / stats.total_users).toFixed(1) 
                                     : '0'}
                             </p>
@@ -261,7 +317,7 @@ const Stats = () => {
                             <i className="pi pi-globe text-5xl text-cyan-500 mb-4"></i>
                             <h3 className="text-xl font-bold mb-2">Total Interacciones</h3>
                             <p className="text-3xl font-bold text-cyan-400">
-                                {(stats?.total_posts || 0) + (stats?.total_comments || 0)}
+                                {(stats.total_posts || 0) + (stats.total_comments || 0)}
                             </p>
                             <p className="text-gray-400 text-sm mt-2">Posts + Comentarios</p>
                         </div>
