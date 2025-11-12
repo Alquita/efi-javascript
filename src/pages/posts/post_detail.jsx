@@ -106,7 +106,7 @@ const PostDetail = () => {
                 <Panel headerTemplate={headerTemplate} footerTemplate={footerTemplate} className="mt-3">
                     <p className="m-0">{post.content}</p>
                 </Panel>
-                <CommentForm/>
+                {user && <CommentForm/> }
                 <Comments/>
             </div>
             }

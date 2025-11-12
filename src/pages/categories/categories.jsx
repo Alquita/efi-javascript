@@ -23,7 +23,7 @@ const Categories = () => {
         const id = opts.rowIndex
     
         return (
-            <div>
+            <div className="flex gap-3">
                 <Button icon='pi pi-pencil' onClick={() => navigate(`/categories/${id}`)} />
                 {user?.role === 'admin' &&
                     <Button icon='pi pi-trash' onClick={() => deleteCategory(row.id, token)} />
