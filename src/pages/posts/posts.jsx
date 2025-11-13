@@ -50,8 +50,6 @@ const Posts = () => {
 
     const deletePost = async (id) => {
         try {
-            console.log(id);
-            
             const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
                 method: 'DELETE',
                 headers: {

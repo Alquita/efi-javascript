@@ -70,11 +70,6 @@ const Navbar = () => {
                     label: 'Gestionar Usuarios',
                     icon: 'pi pi-users',
                     command: () => { navigate('/users') }
-                },
-                {
-                    label: 'Estadísticas Completas',
-                    icon: 'pi pi-chart-line',
-                    command: () => { navigate('/stats') }
                 }
             ]
         }
