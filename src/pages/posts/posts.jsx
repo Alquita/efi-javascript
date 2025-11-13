@@ -5,6 +5,7 @@ import { Button } from "primereact/button"
 import { DataView } from "primereact/dataview"
 import { classNames } from "primereact/utils"
 import { ProgressSpinner } from 'primereact/progressspinner'
+import { confirmDialog } from 'primereact/confirmdialog'
 import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
@@ -34,8 +35,23 @@ const Posts = () => {
 
     }
 
+    const handleDeletePost = (post) => {
+        confirmDialog({
+            message: `¿Está seguro de que quiere eliminar la publicacion ${post.title}?`,
+            header: 'Confirmar eliminado',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => deletePost(post.id),
+            reject: () => {},
+            acceptLabel: 'Sí, eliminar',
+            rejectLabel: 'Cancelar',
+            acceptClassName: 'p-button-danger'
+        })
+    }
+
     const deletePost = async (id) => {
         try {
+            console.log(id);
+            
             const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
                 method: 'DELETE',
                 headers: {
@@ -72,7 +88,7 @@ const Posts = () => {
                                 {(user?.role === 'admin' || user?.sub == post.author_id) &&
                                     <div className="flex gap-3">
                                         <Button icon='pi pi-pencil' onClick={() => navigate(`/posts/${post.id}`)} />
-                                        <Button icon='pi pi-trash' onClick={() => deletePost(post.id, token)} />
+                                        <Button icon='pi pi-trash' onClick={() => handleDeletePost(post)} />
                                     </div>
                                 }
                         </div>

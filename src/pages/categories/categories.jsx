@@ -5,6 +5,7 @@ import { Button } from "primereact/button"
 import { DataTable } from "primereact/datatable"
 import { Column } from 'primereact/column'
 import { ProgressSpinner } from 'primereact/progressspinner'
+import { confirmDialog } from 'primereact/confirmdialog'
 import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
@@ -26,10 +27,23 @@ const Categories = () => {
             <div className="flex gap-3">
                 <Button icon='pi pi-pencil' onClick={() => navigate(`/categories/${id}`)} />
                 {user?.role === 'admin' &&
-                    <Button icon='pi pi-trash' onClick={() => deleteCategory(row.id, token)} />
+                    <Button icon='pi pi-trash' onClick={() => handleDeleteCategory(row)} />
                 }
             </div>
         )
+    }
+
+    const handleDeleteCategory = (category) => {
+        confirmDialog({
+            message: `¿Está seguro de que quiere eliminar la categoria ${category.name}?`,
+            header: 'Confirmar eliminado',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => deleteCategory(category.id),
+            reject: () => {},
+            acceptLabel: 'Sí, eliminar',
+            rejectLabel: 'Cancelar',
+            acceptClassName: 'p-button-danger'
+        })
     }
 
     const deleteCategory = async (id) => {

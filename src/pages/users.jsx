@@ -8,7 +8,7 @@ import { Button } from 'primereact/button'
 import { Dialog } from 'primereact/dialog'
 import { Dropdown } from 'primereact/dropdown'
 import { Tag } from 'primereact/tag'
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog'
+import { confirmDialog } from 'primereact/confirmdialog'
 
 const Users = () => {
     const { token, user } = useContext(AuthContext)
@@ -289,8 +289,6 @@ const Users = () => {
                     </div>
                 </div>
             </Dialog>
-
-            <ConfirmDialog />
         </Fragment>
     )
 }

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom"
 import { Button } from "primereact/button"
 import { Panel } from 'primereact/panel'
 import { ProgressSpinner } from 'primereact/progressspinner'
+import { confirmDialog } from 'primereact/confirmdialog'
 import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
@@ -41,6 +42,19 @@ const PostDetail = () => {
         return (`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} a las ${date.toLocaleTimeString()}`)
     }
 
+    const handleDeletePost = (post) => {
+        confirmDialog({
+            message: `¿Está seguro de que quiere eliminar la publicacion ${post.title}?`,
+            header: 'Confirmar eliminado',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => deletePost(post.id),
+            reject: () => {},
+            acceptLabel: 'Sí, eliminar',
+            rejectLabel: 'Cancelar',
+            acceptClassName: 'p-button-danger'
+        })
+    }
+
     const deletePost = async (id) => {
         try {
             const res = await fetch(`http://localhost:5000/api/posts/${id}`, {
@@ -74,7 +88,7 @@ const PostDetail = () => {
                     {(user?.role === 'admin' || user?.sub == post.author_id) &&
                     <div className="flex gap-3">
                         <Button icon='pi pi-pencil' onClick={() => navigate(`/posts/${post.id}`)} />
-                        <Button icon='pi pi-trash' onClick={() => deletePost(post.id, token)} />
+                        <Button icon='pi pi-trash' onClick={() => handleDeletePost(post)} />
                     </div>
                     }
             </div>

@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react"
 import { Button } from "primereact/button"
 import { DataScroller } from 'primereact/datascroller'
+import { confirmDialog } from 'primereact/confirmdialog'
 import { useParams } from "react-router-dom"
 import { toast } from "react-toastify"
 import { AuthContext } from "../auth/AuthContext"
@@ -29,6 +30,19 @@ const Comments = () => {
         const date = new Date(strDate)
 
         return (`${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()} a las ${date.toLocaleTimeString()}`)
+    }
+
+    const handleDeleteComment = (comment) => {
+        confirmDialog({
+            message: `¿Está seguro de que quiere eliminar el comentario ${comment.text.slice(0,10)}...?`,
+            header: 'Confirmar eliminado',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => deleteComment(comment.id),
+            reject: () => {},
+            acceptLabel: 'Sí, eliminar',
+            rejectLabel: 'Cancelar',
+            acceptClassName: 'p-button-danger'
+        })
     }
 
     const deleteComment = async (id) => {
@@ -67,7 +81,7 @@ const Comments = () => {
                         <div className="flex flex-row lg:flex-column align-items-center lg:align-items-end gap-4 lg:gap-2">
                             {(user?.role === 'admin' || user?.role === 'moderator' || user?.sub == comment.author_id) &&
                             <div className="flex gap-3">
-                                <Button icon='pi pi-trash' onClick={() => deleteComment(comment.id, token)} />
+                                <Button icon='pi pi-trash' onClick={() => handleDeleteComment(comment)} />
                             </div>
                             }
                         </div>
@@ -78,7 +92,7 @@ const Comments = () => {
     };
 
     return (
-        <DataScroller value={comments} itemTemplate={itemTemplate} rows={5} buffer={0.4} header='Comentarios' />
+            <DataScroller value={comments} itemTemplate={itemTemplate} rows={5} buffer={0.4} header='Comentarios' />
     )
 }
 
