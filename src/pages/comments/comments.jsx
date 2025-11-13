@@ -3,7 +3,7 @@ import { Button } from "primereact/button"
 import { DataScroller } from 'primereact/datascroller'
 import { useParams } from "react-router-dom"
 import { toast } from "react-toastify"
-import { AuthContext } from "../pages/auth/AuthContext"
+import { AuthContext } from "../auth/AuthContext"
 
 const Comments = () => {
     const { user, token } = useContext(AuthContext)

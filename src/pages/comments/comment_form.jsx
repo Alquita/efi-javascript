@@ -6,7 +6,7 @@ import { Button } from "primereact/button"
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { toast } from "react-toastify"
-import { AuthContext } from "../pages/auth/AuthContext"
+import { AuthContext } from "../auth/AuthContext"
 
 const validationSchema = Yup.object({
     text: Yup.string().required("El contenido es obligatorio"),

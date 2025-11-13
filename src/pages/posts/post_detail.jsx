@@ -6,8 +6,8 @@ import { ProgressSpinner } from 'primereact/progressspinner'
 import { toast } from "react-toastify"
 import Navbar from "../../components/navbar"
 import { AuthContext } from "../auth/AuthContext"
-import Comments from "../../comments/comments"
-import CommentForm from "../../comments/comment_form"
+import Comments from "../comments/comments"
+import CommentForm from "../comments/comment_form"
 
 const PostDetail = () => {
     const navigate = useNavigate()
