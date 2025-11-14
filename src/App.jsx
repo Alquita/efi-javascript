@@ -24,7 +24,7 @@ function App() {
         <Route 
           path='/posts/new'
           element={
-            <ProtectedRoute allowedRoles={['user', 'moderator', 'admin']}>
+            <ProtectedRoute>
               <PostForm/>
             </ProtectedRoute>
           } 
@@ -34,7 +34,7 @@ function App() {
         <Route
           path='/categories/new'
           element={
-            <ProtectedRoute allowedRoles={['moderator', 'admin']}>
+            <ProtectedRoute>
               <CategoryForm/>
             </ProtectedRoute>
           }
